@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <title>Lite Chat</title>
+    <script>
+        $(function(){
+            $('.glyphicon-plus').click(function(){
+                        var friend=$('#label_'+$(this).attr('id')).text();
+                        $.ajax({
+                                type: "POST",
+                                url: "/search",
+                                dataType: 'text',
+                                data:{ "user":$('#UserName').text(),"friend": friend},
+                                success: function (response) {
+                                                   alert(response)
+                                                }
+                            })
+            })
+        })
+    </script>
+</head>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/home" name="sender" id="UserName">{{ UserName }}</a>
+    </div>
+    <div>
+      <ul class="nav navbar-nav navbar-right">
+
+          <li><form class="form-inline"   action="/search"  method="get">
+    <input type="text" class="form-control" size="50" name="search" placeholder="Search for find friend" required>
+    <button type="submit" class="btn btn-danger">Search</button>
+        </form></li>
+        <li><a href="/out" target="_self"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<h1>Search Result</h1>
+<HR style="color: #2980b9";width="100%";size="1">
+<h4 id="result"><span id="label_{{ result }}">{{ result}}</span> <button><span class="glyphicons glyphicon glyphicon-plus" id="{{ result }}">Add</span></button></h4>
+{% if Flag %}
+<h3>You May also Known these people:</h3>
+{% for friend in friends %}
+    <h4 id="friend"><span id="label_{{ friend }}">{{ friend }}</span>  <button><span class="glyphicons glyphicon glyphicon-plus" id="{{ friend }}">Add</span></button></h4>
+{% endfor %}
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/BootSideMenu.css">
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="js/BootSideMenu.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script>
+        $(function(){
+            $('.friends').click(function(){
+                            $('#label_'+$(this).attr('id')).text('');
+                            $('#chatboard').text($(this).text());
+                            $.ajax({
+                                type: "POST",
+                                url: "/getchat",
+                                dataType: 'text',
+                                data:{ "user":$('#UserName').text(),"talker": $(this).text()},
+                                success: function (response) {
+                                                   $('#chattext').text(response);
+                                                }
+                            })
+
+                        })
+        })
+        $(function () {
+            $('#sendbtn').click(function(){
+                       $.ajax({
+                                type: "POST",
+                                url: "/sendchat",
+                                dataType: 'text',
+                                data:{ "send":$('#UserName').text(),"rec": $('#chatboard').text(),"mess":$('#writemessage').val()},
+                                success: function (response) {
+                                                   var newmessage=$('#UserName').text()+':'+$('#writemessage').val();
+                                                   $('#chattext').append('\n'+newmessage);
+                                                   $('#writemessage').val('');
+                                                   alert(response);
+                                                }
+                            })
+//                                                alert('sender:'+$('#UserName').text()+'\n'+'receiver:'+$('#chatboard').text()+'\n'+'message:'+$('#writemessage').val());
+                        })
+
+        })
+        function get_flag()
+        {
+            if($('#chatboard').text()!='Chat Board'){
+                $.ajax({
+                    type: "POST",
+                    url: "/getchat",
+                    dataType: 'text',
+                    data:{ "user":$('#UserName').text(),"talker": $('#chatboard').text()},
+                    success: function (response) {
+                        $('#chattext').text(response);
+                    }
+                })
+            }
+
+        }
+        setInterval("get_flag()",10000)
+    </script>
+    <style>
+        .sbtn {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-border-radius: 28px;
+  -moz-border-radius: 28px;
+  border-radius: 28px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 23px;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+}
+
+.sbtn:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}
+.triangle-right {
+  position:relative;
+  padding:15px;
+  margin:1em 0 3em;
+  color:#fff;
+  background:#075698; /* default background for browsers without gradient support */
+  /* css3 */
+  background:-webkit-gradient(linear, 0 0, 0 100%, from(#2e88c4), to(#075698));
+  background:-moz-linear-gradient(#2e88c4, #075698);
+  background:-o-linear-gradient(#2e88c4, #075698);
+  background:linear-gradient(#2e88c4, #075698);
+  -webkit-border-radius:10px;
+  -moz-border-radius:10px;
+  border-radius:10px;
+}
+        .triangle-right.left:after {
+  top:16px;
+  left:-40px; /* value = - border-left-width - border-right-width */
+  bottom:auto;
+  border-width:15px 40px 0 0; /* vary these values to change the angle of the vertex */
+  border-color:transparent #075698;
+}
+    </style>
+    <title>Lite Chat</title>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/home" name="sender" id="UserName">{{ UserName }}</a>
+    </div>
+    <div>
+      <ul class="nav navbar-nav navbar-right">
+
+          <li><form class="form-inline"   action="/search"  method="get">
+    <input type="text" class="form-control" size="50" name="search" placeholder="Search for find friend" required>
+    <button type="submit" class="btn btn-danger">Search</button>
+        </form></li>
+        <li><a href="/out" target="_self"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="row">
+<div id="sidebar" class="col-sm-2">
+      <h2>Friends</h2>
+      {% for friend in friends %}
+        <div class="well" id="friend"><a href="#" target="_self" class="friends" id="{{ friend }}">{{ friend.uName }}</a><span class="label label-default" id='label_{{ friend }}'>{% if friend.flag %}{% endif %}</span></div>
+      {% endfor %}
+        <!--<p class="triangle-right left"></p>-->
+</div>
+<div id="chat" class="col-sm-6">
+    <div class="panel panel-primary">
+      <div class="panel-heading" id="chatboard">Chat Board</div>
+   </div>
+    <div id="chatrecord">
+        <textarea class="col-sm-12" rows="12" readonly="readonly" style="resize: none" id="chattext">
+
+        </textarea>
+    </div>
+    <hr width=100% align=left>
+
+    <div id="typeboard">
+        <textarea class="col-sm-12" rows="5" style="resize: none"  id="writemessage"></textarea>
+    </div>
+        <br><br>
+    <div id="sendbutton" class="col-sm-6 col-sm-offset-8">
+        <input type="submit" value="Send Message" class="sbtn" id="sendbtn">
+    </div>
+
+</div>
+    <!--<div id="show" class="col-sm-4">-->
+        <!--<div class="panel panel-primary">-->
+        <!--<div class="panel-heading" id="title_2">Message Board</div>-->
+            <!--{% for m in Messages %}-->
+            <!--<div class="panel-body">{{ m.message}} from {{ m.sender }} at {{ m.timestamp }}</div>-->
+            <!--{% endfor %}-->
+   <!--</div>-->
+    </div>
+ </div>
+</body>
+</html>
